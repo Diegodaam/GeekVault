@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package demo;
+
+message Movie{
+    int32 id = 1;  //id de la pelicula 
+    string name = 2; //Nombre de la pelicula 
+    string kind = 3; //Genero de la pelicula 
+    int32 year = 4;   //Año de la pelicula 
+    int32 score = 5;   //Calificacion de la pelicula 
+}
+
+message MovieId{
+    int32 id = 1;  //La pelicula se buscara por su id 
+}
+
+message Response{
+    string response = 1; //Respuesta que se dara siempre al conluir un metodo
+}
+
+service MovieService{
+    rpc RegisterMovie (Movie) returns (Response);
+    rpc SearchMovie (MovieId) returns (Movie);
+    rpc UpdateMovie (Movie) returns (Response);
+    rpc DeleteMovie (MovieId) returns (Response);
+}
