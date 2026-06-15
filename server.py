@@ -28,15 +28,31 @@ class MovieService(movie_pb2_grpc.MovieServiceServicer):
     def SearchMovie(self, request, context):
         return movie_pb2.Movie()
 
-    def UpdateMovie(self, request, context):
-        return movie_pb2.Response(
-        response="Pendiente"
-    )
-
     def DeleteMovie(self, request, context):
         return movie_pb2.Response(
         response="Pendiente"
     )
+
+    def UpdateMovie(self, request, context):
+        #Buscamos la pelicula por id
+        pelicula = movies_collection.find_one({"_id":request.id})
+
+        #Si no existe
+        if pelicula is None:
+            return movie_pb2.Response(response=f"Error: No se encontró ninguna pelicula con id {request.id}")
+        #Si existe actualizamos
+        movies_collection.update_one(
+            {"_id": request.id},
+            {"$set":{
+                "name":request.name,
+                "kind":request.kind,
+                "year":request.year,
+                "score":request.score
+            }})
+        #Confirmmos los datos actulizados
+        actulizado = movies_collection.find_one({"_id": request.id})
+        return movie_pb2.Response(response=f"Pelicula actualizada: {actulizado}")
+    
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
