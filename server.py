@@ -26,12 +26,49 @@ class MovieService(movie_pb2_grpc.MovieServiceServicer):
         return movie_pb2.Response(response=str(movies_collection.find_one({"_id": request.id})))
     
     def SearchMovie(self, request, context):
-        return movie_pb2.Movie()
-
+          # Buscar la película por id
+        movie = movies_collection.find_one({"_id": request.id})
+        
+        if movie is None:
+            # Devolver un objeto Movie vacío o con valores por defecto
+            return movie_pb2.Movie(
+                id=0,
+                name="No se encontró la película",
+                kind="",
+                year=0,
+                score=0
+            )
+        
+        # Devolver la película encontrada
+        return movie_pb2.Movie(
+            id=movie["_id"],
+            name=movie["name"],
+            kind=movie["kind"],
+            year=movie["year"],
+            score=movie["score"]
+        )
+    
     def DeleteMovie(self, request, context):
-        return movie_pb2.Response(
-        response="Pendiente"
-    )
+           
+         # Verificar si la película existe antes de eliminar
+        pelicula = movies_collection.find_one({"_id": request.id})
+        
+        if pelicula is None:
+            return movie_pb2.Response(
+                response=f"Error: No se encontró ninguna película con id {request.id}"
+            )
+        
+        # Eliminar la película
+        result = movies_collection.delete_one({"_id": request.id})
+        
+        if result.deleted_count > 0:
+            return movie_pb2.Response(
+                response=f"Película con id {request.id} eliminada correctamente"
+            )
+        else:
+            return movie_pb2.Response(
+                response=f"Error: No se pudo eliminar la película con id {request.id}"
+            )
 
     def UpdateMovie(self, request, context):
         #Buscamos la pelicula por id
